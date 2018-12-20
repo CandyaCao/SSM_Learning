@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace指向接口 -->
+<mapper namespace="com.github.candyacao.dao.IStudentMapper">
+	<select id="selectStudentByID" parameterType="Integer" resultType="Student">
+		select id,name,age,address,phone from candyacao_student where id = #{id}
+	</select>
+	<insert id="saveStudent" parameterType="com.github.candyacao.bean.Student">
+		insert into candyacao_student(id,name,age,address,phone)   
+			values(#{id},#{name},#{age},#{address},#{phone})
+	</insert>
+	<insert id="saveStudent2">
+		insert into candyacao_student(id,name,age,address,phone)   
+			values(12,'tom',31,'苏州','143656')
+	</insert>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- 配置参数 -->
+	<properties></properties>
+	<!-- 类型别名 -->
+	<typeAliases> 
+		<!-- <typeAlias alias="Student" type="com.github.candyacao.bean.Student" />  -->
+		<!-- 自动给改包下的javabean添加一个类型别名，默认为首字母小写 -->
+		<package name="com.github.candyacao.bean"/>
+		<package name="com.github.candyacao.o2o"/>
+		<package name="com.github.candyacao.o2m"/>
+		<package name="com.github.candyacao.special"/>
+	</typeAliases>
+	<typeHandlers>
+		<!-- 自定义类型处理器 -->
+		<typeHandler handler="com.github.candyacao.Handler.AddressTypeHandler"/>
+		<!-- mybatis内置的枚举处理器 -->
+		<typeHandler handler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="com.github.candyacao.special.Gender"/> 
+		
+	</typeHandlers>
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<!-- <property name="driver" value="com.mysql.jdbc.Driver" />
+				<property name="url" value="jdbc:mysql://localhost:3306/test" /> -->
+				
+				<property name="driver" value="com.mysql.cj.jdbc.Driver" />				
+				<property name="url" value="jdbc:mysql://localhost/test?useUnicode=true&amp;useJDBCCompliantTimezoneShift=true&amp;useLegacyDatetimeCode=false&amp;serverTimezone=UTC" />
+				<!-- <property name="driver"
+					value="oracle.jdbc.driver.OracleDriver" />
+				<property name="url"
+					value="jdbc:oracle:thin:@127.0.0.1:1521:XE" /> -->
+				<property name="username" value="root" />
+				<property name="password" value="" />
+			</dataSource>
+		</environment>
+	</environments>
+	<mappers> 
+	<!-- 指向mapper文件 -->
+		<mapper resource="com/github/candyacao/bean/StudentMapper.xml" />
+ 		<mapper resource="com/github/candyacao/bean/CustomerMapper.xml"/> 
+ 		<mapper resource="com/github/candyacao/o2o/O2OMapper.xml" />
+ 		<mapper resource="com/github/candyacao/o2m/O2MMapper.xml"/>
+		<mapper resource="com/github/candyacao/special/UserMapper.xml"/>
+		<!-- class和package需要在ICustomerMapper文件中添加注解才可以正常使用，且使用package时不能用其他属性再配置 -->
+		<!-- <mapper class="com.github.candyacao.dao.ICustomerMapper"/>
+		<package name="com.github.candyacao.dao"/> -->
+	</mappers>
+		
+</configuration>

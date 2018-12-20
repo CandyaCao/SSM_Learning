@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace指向接口 -->
+<mapper namespace="com.github.candyacao.dao.ICustomerMapper">
+	
+	<insert id="insertCustomer" parameterType="Customer">
+		insert into candyacao_customer(id,username,password,dob,address)    
+			 values(#{id},#{username},#{password},#{dob},#{address})
+	</insert>
+	<!-- oracle借助于序列，实现主键自增长 -->
+	<!-- 此种情况实现自增长，在Java对象中id为null，即无值 -->
+	<insert id="insertCustomerWithAutoKeyByOracle1" parameterType="customer">
+		insert into candyacao_customer(id,username,password,dob,address)    
+			 values(candyacao_customer_seq.nextval,#{username},#{password},#{dob},#{address})
+	</insert>
+	<!-- 此种情况实现自增长，在Java对象中id有值，通过keyProperty将id赋值 -->
+	<insert id="insertCustomerWithAutoKeyByOracle2" parameterType="customer">
+		<selectKey order="BEFORE" keyProperty="id" resultType="int">
+			select candyacao_customer_seq.nextval from dual
+		</selectKey>
+		insert into candyacao_customer(id,username,password,dob,address)    
+			 values(#{id},#{username},#{password},#{dob},#{address})
+	</insert>
+	<!-- 主键自增长,数据驱动的支持  mysql，sql server -->
+	<insert id="insertCustomerWithAutoKeyByMysql" parameterType="customer" useGeneratedKeys="true" keyProperty="id">
+		insert into candyacao_customer(id,username,password,dob,address)    
+			 values(#{id},#{username},#{password},#{dob},#{address})
+	</insert>
+	<!-- 修改 -->
+	<update id="updateCustomer" parameterType="Customer">
+		update candyacao_customer set password=#{password},address=#{address} where id=#{id}
+	</update>
+	<!-- 删除 -->
+	<delete id="deleteCustomerByID">
+		delete from candyacao_customer where id=#{id}
+	</delete>
+	<!-- 查询 -->
+	<select id="selectCustomerByID" resultType="Customer">
+		select id,username,password,dob,address from candyacao_customer where id=#{id}
+	</select>
+	<select id="selectCustomerByIDWithMap" resultType="map">
+		select id,username,password,dob,address from candyacao_customer where id=#{id}
+	</select>
+	<select id="selectAllCustomer" resultType="Customer">
+		select id,username,password,dob,address from candyacao_customer 
+	</select>
+	<select id="selectAllCustomerWithMap" resultType="map">
+		select id,username,password,dob,address from candyacao_customer 
+	</select>
+			
+
+	<!-- <select id="selectCustomerByID" parameterType="Integer" resultType="Customer">
+		select id,name,age,address,phone from candyacao_customer where id = #{id}
+	</select> -->
+</mapper>

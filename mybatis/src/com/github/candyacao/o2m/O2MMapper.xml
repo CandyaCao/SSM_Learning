@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace指向接口 -->
+<mapper namespace="com.github.candyacao.o2m.IO2MMapper">
+	
+	<!-- 主键自增长,数据驱动的支持  mysql，sql server -->
+	<insert id="saveOrder" parameterType="order" useGeneratedKeys="true" keyProperty="orderID">
+		insert into `order`(id,name,price,dob) values(#{orderID},#{orderName},#{price},#{dob})
+	</insert>
+	<insert id="saveOrderLine" parameterType="orderLine" useGeneratedKeys="true" keyProperty="id">
+		insert into orderLine(id,name,price,nums,order_id) values(#{id},#{name},#{price},#{nums},#{order.orderID})
+	</insert>
+	<!-- 1. 根据订单编号查询订单信息（不包含订单明细） -->
+	<select id="selectOrderByID" resultMap="OrderResultMap">
+		select id,name,price,dob 
+		from `order`
+		where id=#{orderID}
+	</select>
+	<resultMap type="order" id="OrderResultMap">
+		<id column="id" property="orderID"/>
+		<result column="name" property="orderName"/>
+	</resultMap>
+	<!-- 2.1  根据订单编号查询订单信息（包含订单明细） -->
+	<!-- 在查询数据量小的情况下用嵌套子查询，数据量大的时候就用嵌套结果集 -->
+	<select id="selectOrderAndLineByID" resultMap="OrderAndLineResultMap">
+		select id,name,price,dob 
+		from `order`
+		where id=#{orderID}
+	</select>
+	<resultMap type="order" id="OrderAndLineResultMap" extends="OrderResultMap">
+		<!-- 如果不继承，需要将这两行复制粘贴下来 -->
+		<!-- <id column="id" property="orderID"/>
+		<result column="name" property="orderName"/> -->
+		<!-- 处理OrderLine -->
+		<!-- 使用嵌套子查询select -->
+		<!-- 在一或多的一方 查一的一方，用association-->
+<!-- 		<association property="orderLine" select="selectOrderLineByOrderID" column="id"></association> -->
+		<!-- 在一的一方 查多的一方，用collection-->
+		<collection property="orderLine" select="selectOrderLineByOrderID" column="id"></collection>
+	</resultMap>
+	<select id="selectOrderLineByOrderID" resultType="orderLine">
+		select id,name,price,nums 
+		from orderLine 
+		where order_id=#{id}
+	</select>
+	
+	<!-- 2.2 根据订单编号查询订单信息（包含订单明细） -->
+	<select id="selectOrderAndLineByID2" resultMap="OrderAndLineResultMap2">
+		select o.id orderID,o.name orderName,o.price oPrice,dob,ol.id olID,ol.name olName,ol.price olPrice,nums 
+		from `order` o,orderLine ol 
+		where ol.order_id=o.id and o.id=#{id}
+	</select>
+	<resultMap type="order" id="OrderAndLineResultMap2">
+		<id column="orderID" property="orderID"/>
+		<result column="orderName" property="orderName"/>
+		<result column="oPrice" property="price"/>
+		<result column="dob" property="dob"/>
+		<!-- 嵌套结果集 -->
+		<!-- resultMap="LineMap2" -->
+		<collection property="orderLine" ofType="orderLine">
+			<id column="olID" property="id"/>
+			<result column="olName" property="name"/>
+			<result column="olPrice" property="price"/>
+			<result column="nums" property="nums"/>
+		</collection>
+	</resultMap>
+	<resultMap type="orderLine" id="LineMap2">
+		<id column="olID" property="id"/>
+		<result column="olName" property="name"/>
+		<result column="olPrice" property="price"/>
+		<result column="nums" property="nums"/>
+	</resultMap>
+	<!-- 3. 查询订单明细（包含订单信息） -->
+	<select id="selectOrderLineAndOrderAll" resultMap="LineAndOrderMap">
+		select id,name,price,nums,order_id 
+		from orderLine
+	</select>
+	<resultMap type="orderLine" id="LineAndOrderMap">
+		<!-- order信息     一的一方 -->
+		<association property="order" select="selectOrderByID" column="order_id"></association>
+	</resultMap>
+	
+	<!-- 动态SQL语句 -->
+	<select id="searchOrderLine" resultType="orderLine">
+		select id,name,price,nums 
+		from orderLine 
+		where name like #{param1} 
+		and price between #{param2} and #{param3}
+	</select>
+	<select id="searchOrderLine2" resultType="orderLine">
+		select id,name,price,nums 
+		from orderLine 
+		<where>
+			<if test="name!=null">
+				and name like #{name}
+			</if>
+			<if test="price!=0.0">
+				and price between #{price}-500 and #{price}+500
+ 			</if>
+		</where>
+	</select>
+	<select id="searchChoose" resultType="orderLine">
+		select *  
+		from orderLine 
+		<choose>
+			<when test="orderInfo=='name'">
+			order by name asc
+			</when>
+			<when test="orderInfo=='price'">
+			order by price asc
+			</when>
+			<otherwise>
+			order by id asc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="searchTrim" resultType="orderLine">
+		select *  
+		from orderLine 
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="searchName!=null">
+				and name like #{searchName}
+			</if>
+			<if test="searchPrice!=null">
+				and price between #{min} and #{max}
+ 			</if>
+ 			
+ 			
+		</trim>
+	</select>
+</mapper>

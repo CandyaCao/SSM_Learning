@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace指向接口 -->
+<mapper namespace="com.github.candyacao.o2o.IO2OMapper">
+	
+	<!-- 主键自增长,数据驱动的支持  mysql，sql server -->
+	<insert id="saveWife" parameterType="wife" useGeneratedKeys="true" keyProperty="id">
+		insert into wife(wid,name) values(#{id},#{name})
+	</insert>
+	<insert id="saveHusband" parameterType="hus" useGeneratedKeys="true" keyProperty="id">
+		insert into husband(hid,name,wife_id) values(#{id},#{name},#{wife.id})
+	</insert>
+	
+	<!-- <select id="selectWifeByID" resultType="wife">
+		select wid as id,name from wife where wid=#{id}
+	</select> -->
+	<resultMap type="wife" id="WifeResultMap">
+		<id column="wid" property="id"/>
+	</resultMap>
+	<select id="selectWifeByID" resultMap="WifeResultMap">
+		select wid,name from wife where wid=#{id}
+	</select>
+	<!-- 2.1查询Hus信息（不包含Wife） -->
+	<select id="selectHusByID" resultType="hus">
+		select hid id,name from husband where hid=#{id}
+	</select>
+	<!-- 2.2查询Hus信息（包含wife） -->
+	<resultMap type="hus" id="HusResultMap">
+		<id column="hid" property="id"/>
+		<result column="hname" property="name"/>
+		<!-- 嵌套查询：第一种方式 -->
+		<!-- <result column="wife_id" property="wife.id"/>
+		<result column="wname" property="wife.name"/> -->
+		<!-- 嵌套查询：第二种方式-嵌套结果集ResultMap -->
+		<association property="wife" resultMap="WifeResultMap2"></association>
+		<!-- 第三种方式：嵌套子查询select -->
+	</resultMap>
+	<resultMap type="wife" id="WifeResultMap2">
+		<id column="wife_id" property="id"/>
+		<result column="wname" property="name"/>
+	</resultMap>
+	
+	<!-- 2.3查询Hus信息（包含wife）嵌套子查询 -->
+	<select id="selectHusAndWifeByID2" resultMap="HusAndWifeMap2">
+		select hid,name,wife_id 
+		from husband 
+		where hid=#{id} 
+	
+	</select>
+	<resultMap type="hus" id="HusAndWifeMap2">
+		<id column="hid" property="id"/>
+		<!-- <result column="name" property="name"/> -->
+		<association property="wife" column="wife_id" select="selectWifeByID"></association>
+	</resultMap>
+		
+	<select id="selectHusAndWifeByID" resultMap="HusResultMap">
+		select hid,h.name hname,wife_id,w.name wname from husband h,wife w   
+			where h.wife_id=w.wid and hid=#{id}
+	</select>
+	
+</mapper>

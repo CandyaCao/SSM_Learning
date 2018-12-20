@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace指向接口 -->
+<mapper namespace="com.github.candyacao.special.IUserMapper">
+	<!-- 主键自增长,数据驱动的支持  mysql，sql server -->
+	<insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+		insert into t_user(id,name,gender) 
+			values(#{id},#{name},#{gender}) 
+	</insert>
+	<select id="selectUserByID" resultType="User">
+		select * from t_user where id=#{id}
+	</select>
+	
+	
+	<!-- UserPic的配置 -->
+	<insert id="insertUserPic" parameterType="UserPic" useGeneratedKeys="true" keyProperty="id">
+		insert into user_pics(id,name, pic,bio) 
+			values(#{id},#{name},#{pic},#{bio}) 
+	</insert>
+
+	<select id="getUserPicById" parameterType="int" resultType="UserPic"> 
+		select * from user_pics where id=#{id} 
+	</select> 
+	<select id="getUserPicAll"  resultType="UserPic"> 
+		select * from user_pics 
+	</select> 
+	<!-- Map<id,UserPic> -->
+	<!-- <select id="getUserPicAll"  resultType="UserPic"> 
+		select * from user_pics 
+	</select> -->
+</mapper>
